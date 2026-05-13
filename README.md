@@ -11,13 +11,14 @@ Este repositório existe para **não misturar** a interface de configuração co
 
 - Uma única página com:
   - **URL base da API** — onde o FastAPI está rodando (padrão: `http://localhost:8000`).
+  - **ADMIN_TOKEN** (opcional no formulário) — se preenchido, enviado no header `X-ADMIN-TOKEN` no `POST /config` (deve coincidir com `ADMIN_TOKEN` no backend).
   - **GROK_API_KEY** — chave da Grok enviada no corpo do `POST /config`.
   - **BASE_URL** — URL do site cujo conteúdo será usado como contexto (RAG), também no `POST /config`.
 - Ao enviar o formulário, chama:
 
   `POST {API_BASE}/config`
 
-  com JSON:
+  com header `X-ADMIN-TOKEN` quando o campo token estiver preenchido, e JSON:
 
   ```json
   {
@@ -25,6 +26,8 @@ Este repositório existe para **não misturar** a interface de configuração co
     "BASE_URL": "https://..."
   }
   ```
+
+  Em **401**, a página mostra a mensagem retornada pela API (token ausente/incorreto ou servidor sem `ADMIN_TOKEN`).
 
 - Exibe mensagem de sucesso/erro e, se a API retornar `config.widget_script_url`, mostra o snippet `<script src="..."></script>` para embutir o widget.
 
@@ -51,11 +54,12 @@ Este repositório existe para **não misturar** a interface de configuração co
    cp .env.example .env
    ```
 
-   Variável suportada:
+   Variáveis suportadas:
 
    | Variável              | Descrição                                      |
    | --------------------- | ---------------------------------------------- |
    | `VITE_API_BASE_URL`   | URL base do FastAPI, sem `/` no final.       |
+   | `VITE_ADMIN_TOKEN`    | (Opcional) Pré-preenche o campo do token admin no painel. Evite expor em builds públicos. |
 
 3. Inicie o Vite:
 
@@ -81,7 +85,7 @@ Saída em `dist/`. Sirva com qualquer servidor estático ou CDN. Lembre-se de de
 
 | Front (este projeto) | Backend (bot_ia_sites) |
 | -------------------- | ---------------------- |
-| `POST /config`       | `app/views/api.py` — aplica `GROK_API_KEY` e `BASE_URL` no processo |
+| `POST /config`       | `app/views/api.py` — exige `X-ADMIN-TOKEN` (= `ADMIN_TOKEN` no servidor); aplica `GROK_API_KEY` e `BASE_URL` no processo |
 | (futuro) preview     | `GET /widget.js` — script do chat |
 | (futuro) teste chat  | `POST /chat` — mensagens do widget |
 

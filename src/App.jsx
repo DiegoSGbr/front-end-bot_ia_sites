@@ -5,8 +5,11 @@ const defaultApiBase =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ||
   "http://localhost:8000";
 
+const defaultAdminToken = import.meta.env.VITE_ADMIN_TOKEN ?? "";
+
 export default function App() {
   const [apiBase, setApiBase] = useState(defaultApiBase);
+  const [adminToken, setAdminToken] = useState(defaultAdminToken);
   const [grokApiKey, setGrokApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,10 +22,15 @@ export default function App() {
     setResult(null);
     setLoading(true);
     const url = `${apiBase.replace(/\/$/, "")}/config`;
+    const headers = { "Content-Type": "application/json" };
+    const trimmedAdmin = adminToken.trim();
+    if (trimmedAdmin) {
+      headers["X-ADMIN-TOKEN"] = trimmedAdmin;
+    }
     try {
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           GROK_API_KEY: grokApiKey.trim(),
           BASE_URL: baseUrl.trim(),
@@ -30,9 +38,31 @@ export default function App() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 401) {
+          const detail = data.detail;
+          const msg =
+            typeof detail === "string"
+              ? detail
+              : Array.isArray(detail)
+                ? detail
+                    .map((item) =>
+                      typeof item === "object" && item?.msg != null
+                        ? item.msg
+                        : JSON.stringify(item)
+                    )
+                    .join(" ")
+                : null;
+          setError(
+            msg ||
+              "Acesso negado (401). Confira o token administrativo (header X-ADMIN-TOKEN) e se ADMIN_TOKEN está definido no servidor."
+          );
+          return;
+        }
         setError(
           data.detail
-            ? JSON.stringify(data.detail)
+            ? typeof data.detail === "string"
+              ? data.detail
+              : JSON.stringify(data.detail)
             : res.statusText || `Erro HTTP ${res.status}`
         );
         return;
@@ -109,6 +139,23 @@ export default function App() {
             <small className="hint">
               Defina também em <code>.env</code> como{" "}
               <code>VITE_API_BASE_URL</code> para não precisar alterar aqui.
+            </small>
+          </label>
+
+          <label className="field">
+            <span>ADMIN_TOKEN (opcional no formulário, obrigatório na API)</span>
+            <input
+              type="password"
+              autoComplete="off"
+              value={adminToken}
+              onChange={(e) => setAdminToken(e.target.value)}
+              placeholder="Mesmo valor que ADMIN_TOKEN no servidor"
+            />
+            <small className="hint">
+              Se o backend exige proteção em <code>POST /config</code>, preencha com o
+              mesmo secret definido em <code>ADMIN_TOKEN</code>. Você pode pré-preencher via{" "}
+              <code>VITE_ADMIN_TOKEN</code> no <code>.env</code> (cuidado em ambientes
+              públicos).
             </small>
           </label>
 
