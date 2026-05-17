@@ -1,15 +1,14 @@
 import { useState } from "react";
 import "./App.css";
 
-const defaultApiBase =
+const apiBase =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ||
   "http://localhost:8000";
 
-const defaultAdminToken = import.meta.env.VITE_ADMIN_TOKEN ?? "";
+/** Mesmo valor que ADMIN_TOKEN no backend; injetado no build (Render: variável de ambiente). */
+const adminToken = (import.meta.env.VITE_ADMIN_TOKEN ?? "").trim();
 
 export default function App() {
-  const [apiBase, setApiBase] = useState(defaultApiBase);
-  const [adminToken, setAdminToken] = useState(defaultAdminToken);
   const [grokApiKey, setGrokApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,12 +20,19 @@ export default function App() {
     setError("");
     setResult(null);
     setLoading(true);
-    const url = `${apiBase.replace(/\/$/, "")}/config`;
-    const headers = { "Content-Type": "application/json" };
-    const trimmedAdmin = adminToken.trim();
-    if (trimmedAdmin) {
-      headers["X-ADMIN-TOKEN"] = trimmedAdmin;
+    if (!adminToken) {
+      setError(
+        "O painel não está configurado para enviar a configuração. Defina VITE_ADMIN_TOKEN no deploy do front-end (mesmo valor que ADMIN_TOKEN na API)."
+      );
+      setLoading(false);
+      return;
     }
+
+    const url = `${apiBase.replace(/\/$/, "")}/config`;
+    const headers = {
+      "Content-Type": "application/json",
+      "X-ADMIN-TOKEN": adminToken,
+    };
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -54,7 +60,7 @@ export default function App() {
                 : null;
           setError(
             msg ||
-              "Acesso negado (401). Confira o token administrativo (header X-ADMIN-TOKEN) e se ADMIN_TOKEN está definido no servidor."
+              "Não foi possível aplicar a configuração. Verifique sua chave Grok e a URL do site e tente novamente."
           );
           return;
         }
@@ -127,38 +133,6 @@ export default function App() {
 
       <main className="card">
         <form onSubmit={handleSubmit} className="form">
-          {/*<label className="field">
-            <span>URL base da API (backend)</span>
-            <input
-              type="url"
-              value={apiBase}
-              onChange={(e) => setApiBase(e.target.value)}
-              placeholder="http://localhost:8000"
-              required
-            />
-            <small className="hint">
-              Defina também em <code>.env</code> como{" "}
-              <code>VITE_API_BASE_URL</code> para não precisar alterar aqui.
-            </small>
-          </label>
-
-          <label className="field">
-            <span>ADMIN_TOKEN (opcional no formulário, obrigatório na API)</span>
-            <input
-              type="password"
-              autoComplete="off"
-              value={adminToken}
-              onChange={(e) => setAdminToken(e.target.value)}
-              placeholder="Mesmo valor que ADMIN_TOKEN no servidor"
-            />
-            <small className="hint">
-              Se o backend exige proteção em <code>POST /config</code>, preencha com o
-              mesmo secret definido em <code>ADMIN_TOKEN</code>. Você pode pré-preencher via{" "}
-              <code>VITE_ADMIN_TOKEN</code> no <code>.env</code> (cuidado em ambientes
-              públicos).
-            </small>
-          </label>*/}
-
           <label className="field">
             <span>Sua chave Grok IA</span>
             <input
