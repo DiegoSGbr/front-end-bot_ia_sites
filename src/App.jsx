@@ -127,7 +127,7 @@ export default function App() {
 
       <main className="card">
         <form onSubmit={handleSubmit} className="form">
-          <label className="field">
+          {/*<label className="field">
             <span>URL base da API (backend)</span>
             <input
               type="url"
@@ -157,10 +157,10 @@ export default function App() {
               <code>VITE_ADMIN_TOKEN</code> no <code>.env</code> (cuidado em ambientes
               públicos).
             </small>
-          </label>
+          </label>*/}
 
           <label className="field">
-            <span>GROK_API_KEY</span>
+            <span>Sua chave Grok IA</span>
             <input
               type="password"
               autoComplete="off"
@@ -172,7 +172,7 @@ export default function App() {
           </label>
 
           <label className="field">
-            <span>BASE_URL</span>
+            <span>URL do site</span>
             <input
               type="url"
               value={baseUrl}
