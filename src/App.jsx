@@ -168,10 +168,25 @@ export default function App() {
         )}
 
         {result && (
-          <div className="banner success">
+          <div
+            className={`banner ${result.config?.index_ok === false ? "warning" : "success"}`}
+          >
             <p>
               <strong>{result.message}</strong>
             </p>
+            {result.config?.index_ok === false && (
+              <p className="hint">
+                O conteúdo do site não foi indexado corretamente (
+                {result.config?.context_chars ?? 0} caracteres). Confira a URL e tente
+                novamente; sites com proteção JavaScript podem exigir alguns minutos no
+                primeiro deploy.
+              </p>
+            )}
+            {result.config?.index_ok !== false && result.config?.context_chars != null && (
+              <p className="hint">
+                Conteúdo indexado: {result.config.context_chars} caracteres do site.
+              </p>
+            )}
             {result.config?.widget_script_url && (
               <p className="embed">
                 <span>Script do widget:</span>

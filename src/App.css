@@ -165,6 +165,12 @@
   border: 1px solid rgba(89, 139, 111, 0.55);
 }
 
+.banner.warning {
+  background: rgba(92, 68, 28, 0.35);
+  color: #ffe9c7;
+  border: 1px solid rgba(180, 130, 50, 0.55);
+}
+
 .embed {
   margin: 0.75rem 0 0;
 }
