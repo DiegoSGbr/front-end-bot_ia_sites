@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 import "./App.css";
 
 const apiBase =
@@ -9,11 +10,103 @@ const apiBase =
 const adminToken = (import.meta.env.VITE_ADMIN_TOKEN ?? "").trim();
 
 export default function App() {
+  const canvasRef = useRef(null);
   const [grokApiKey, setGrokApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 90;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const particlesCount = 2000;
+    const positions = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount; i += 1) {
+      const i3 = i * 3;
+      positions[i3] = (Math.random() - 0.5) * 260;
+      positions[i3 + 1] = (Math.random() - 0.5) * 260;
+      positions[i3 + 2] = (Math.random() - 0.5) * 260;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      size: 0.85,
+      color: 0x8fb6ff,
+      transparent: true,
+      opacity: 0.75,
+      depthWrite: false,
+    });
+
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    const mouse = { x: 0, y: 0 };
+    const targetRotation = { x: 0, y: 0 };
+    const targetCamera = { x: 0, y: 0 };
+
+    let frameId = 0;
+    const animate = () => {
+      targetRotation.y = mouse.x * 0.35;
+      targetRotation.x = mouse.y * 0.2;
+      targetCamera.x = mouse.x * 6;
+      targetCamera.y = mouse.y * 3;
+
+      points.rotation.y += (targetRotation.y - points.rotation.y) * 0.03;
+      points.rotation.x += (targetRotation.x - points.rotation.x) * 0.03;
+      camera.position.x += (targetCamera.x - camera.position.x) * 0.02;
+      camera.position.y += (-targetCamera.y - camera.position.y) * 0.02;
+      camera.lookAt(0, 0, 0);
+      renderer.render(scene, camera);
+      frameId = window.requestAnimationFrame(animate);
+    };
+
+    const onResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    const onMouseMove = (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
+    };
+
+    const onMouseLeave = () => {
+      mouse.x = 0;
+      mouse.y = 0;
+    };
+
+    window.addEventListener("resize", onResize);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseleave", onMouseLeave);
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseleave", onMouseLeave);
+      window.cancelAnimationFrame(frameId);
+      geometry.dispose();
+      material.dispose();
+      renderer.dispose();
+    };
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -85,7 +178,11 @@ export default function App() {
   }
 
   return (
-    <div className="page">
+    <>
+      <div className="bg3d" aria-hidden="true">
+        <canvas ref={canvasRef} />
+      </div>
+      <div className="page">
       <header className="header">
         <h1>Chatbot para atendimento online com IA Especialista no seu Site </h1>
         <p className="lead">
@@ -208,6 +305,7 @@ export default function App() {
           Projeto <code>bot_ia_sites</code> (FastAPI).
         </p>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
