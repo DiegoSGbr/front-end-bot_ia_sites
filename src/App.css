@@ -231,3 +231,26 @@
 .footer p {
   margin: 0;
 }
+
+.contact-label {
+  margin-top: 1rem !important;
+  margin-bottom: 0.55rem !important;
+  font-weight: 600;
+  color: #c5c9d1;
+}
+
+.contact-links {
+  margin-top: 0;
+}
+
+.link-icon-whatsapp {
+  width: 22px;
+}
+
+.link-icon-github {
+  width: 20px;
+}
+
+.link-icon-linkedin {
+  width: 20px;
+}

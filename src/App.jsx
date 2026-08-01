@@ -304,6 +304,51 @@ export default function App() {
         <p>
           Projeto <code>bot_ia_sites</code> (FastAPI).
         </p>
+        <p className="contact-label">Contato / redes</p>
+        <div className="useful-links contact-links">
+          <a
+            className="link-chip"
+            href="https://api.whatsapp.com/send/?phone=%2B5534984150460&text=Ola%21&type=phone_number&app_absent=0"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Falar no WhatsApp"
+          >
+            <img
+              className="link-icon link-icon-whatsapp"
+              src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+              alt="WhatsApp"
+            />
+            <span>WhatsApp</span>
+          </a>
+          <a
+            className="link-chip"
+            href="https://github.com/DiegoSGbr"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="GitHub — DiegoSGbr"
+          >
+            <img
+              className="link-icon link-icon-github"
+              src="https://cdn.simpleicons.org/github/e9ebef"
+              alt="GitHub"
+            />
+            <span>GitHub</span>
+          </a>
+          <a
+            className="link-chip"
+            href="https://www.linkedin.com/in/diegosgbr/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="LinkedIn — Diego SG"
+          >
+            <img
+              className="link-icon link-icon-linkedin"
+              src="https://cdn.simpleicons.org/linkedin/0A66C2"
+              alt="LinkedIn"
+            />
+            <span>LinkedIn</span>
+          </a>
+        </div>
       </footer>
       </div>
     </>
