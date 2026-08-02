@@ -247,10 +247,11 @@
   width: 22px;
 }
 
-.link-icon-github {
-  width: 20px;
-}
-
+.link-icon-email,
+.link-icon-github,
 .link-icon-linkedin {
   width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #e9ebef;
 }
